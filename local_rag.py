@@ -63,5 +63,5 @@ qa = RetrievalQA.from_chain_type(llm=llm,
                                  return_source_documents=True,
                                  chain_type_kwargs={"prompt": prompt})
 
-response = qa.invoke({"query": "Cual son los trabajos desempeñados por el dueño del curriculum"})
+response = qa.invoke({"query": "Según el currículum adjunto, ¿puedes listar todos los trabajos y responsabilidades desempeñados por el dueño del currículum? Por favor, incluye detalles sobre las fechas de cada posición y las tareas específicas realizadas en cada una."})
 print(response["result"])
