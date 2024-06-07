@@ -26,9 +26,14 @@ def leer_cv(ruta_cv):
     """
     Lee el contenido del CV desde un archivo de texto.
     """
-    with open(ruta_cv, 'r', encoding='utf-8') as file:
-        cv_completo = file.read()
-    return cv_completo
+    try:
+        with open(ruta_cv, 'r', encoding='utf-8') as file:
+            cv_completo = file.read()
+        print(f"CV leído correctamente:\n{cv_completo[:100]}...")  # Muestra las primeras 100 caracteres para verificación
+        return cv_completo
+    except Exception as e:
+        print(f"Error leyendo el CV desde {ruta_cv}: {e}")
+        return ""
 
 def cargar_multiples_documentos(rutas_archivos):
     """
@@ -42,6 +47,8 @@ def cargar_multiples_documentos(rutas_archivos):
 def cargar_datos():
     oferta = obtener_input_usuario("Introduce el nombre de la oferta de trabajo")
     cv_completo = leer_cv("cv.txt")
+    print(f"Oferta:\n{oferta}\n")
+    print(f"CV:\n{cv_completo[:100]}...")  # Muestra las primeras 100 caracteres para verificación
     
     if not oferta or not cv_completo:
         raise ValueError("Las claves 'oferta' y 'cv' no pueden estar vacías.")
@@ -71,9 +78,11 @@ def configurar_modelo():
 
 def crear_qa_chain(llm, retriever):
     custom_prompt_template = """Usa la siguiente información para evaluar el CV del candidato.
+    Oferta de trabajo: {oferta}
+    CV del candidato: {cv}
 
     Contexto: {context}
-    Pregunta: {question}
+    Pregunta: {query}
 
     Genera una respuesta en formato JSON que contenga la siguiente información:
     a. Valor numérico con la puntuación de 0 a 100 según la experiencia: Se debe tener en cuenta sólo los puestos de trabajo relacionados con el del título aportado, por ejemplo, no debe contar la experiencia como repartidor para un puesto de cajero.
@@ -82,7 +91,7 @@ def crear_qa_chain(llm, retriever):
 
     Respuesta JSON:
     """
-    prompt = PromptTemplate(template=custom_prompt_template, input_variables=['context', 'question'])
+    prompt = PromptTemplate(template=custom_prompt_template, input_variables=['oferta', 'cv', 'context', 'query'])
 
     qa = RetrievalQA.from_chain_type(
         llm=llm,
@@ -103,16 +112,17 @@ def iniciar_chat(qa, oferta, cv_completo):
             break
 
         try:
-            context = f"CV completo: {cv_completo}\nOferta de trabajo: {oferta}"
             inputs = {
                 "query": pregunta,
-                "context": context
+                "oferta": oferta,
+                "cv": cv_completo,
+                "context": ""
             }
             
             # Debug prints
             print(f"Inputs: {inputs}")
 
-            respuesta = qa.invoke(inputs)  # Usa el método `run` en lugar de `invoke`
+            respuesta = qa.invoke(inputs)
             
             metadata = []
             for doc in respuesta['source_documents']:
@@ -131,9 +141,6 @@ def iniciar_chat(qa, oferta, cv_completo):
 if __name__ == "__main__":
     try:
         oferta, cv_completo = cargar_datos()
-        print(f"CV:\n{cv_completo[:100]}...\n")  # Muestra las primeras 100 caracteres para verificación
-        print(f"La oferta es {oferta}\n")
-
         llm, retriever = configurar_modelo()
         qa = crear_qa_chain(llm, retriever)
         iniciar_chat(qa, oferta, cv_completo)

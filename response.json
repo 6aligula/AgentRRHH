@@ -1,0 +1,22 @@
+{
+    "puntuacion": " ```json\n\n{\n\n  \"puntuacion\": 50,\n\n  \"experiencia\": [\n\n    {\n\n      \"puesto\": \"Coordinador de Promociones y Ofertas\",\n\n      \"empresa\": \"Nombre de la empresa\",\n\n      \"duracion\": \"2 años\"\n\n    },\n\n    {\nunos años: \"Nombre de la empresa\",\n\n      \"duracion\": \"3 años\"\n\n    }\n\n  ],\n\n  \"descripcion_experiencia\": \"El candidato, Juan Pérez, cuenta con una experiencia relevante en el área de gestión de promociones y ofertas como Coordinador de Promociones y Ofertas. Esta experiencia es directamente relacionada al puesto de Gerente de Tienda ya que implica tareas similares como la coordinación de campañas, manejo de inventarios y atención al cliente, lo cual justifica su puntuación parcial de 50 puntos sobre el total solicitado de 100 puntos.\"\n\n}\n\n```",
+    "trabajos_relacionados": [
+        [
+            "page: 0",
+            "src/Sistema_de_Puntuacion.pdf"
+        ],
+        [
+            "page: 0",
+            "src/Ejemplo_Sistema_de_Puntuacion_Experiencia.pdf"
+        ],
+        [
+            "page: 0",
+            "src/Ejemplo_Sistema_de_Puntuacion_Experiencia.pdf"
+        ],
+        [
+            "page: 1",
+            "src/Lista_Trabajos_Relacionados_Encargado_Supermercado.pdf"
+        ]
+    ],
+    "descripcion": "Descripción de la evaluación basada en la oferta de trabajo y el CV."
+} 
