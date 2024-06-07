@@ -44,7 +44,8 @@ def cargar_multiples_documentos(rutas_archivos):
     return documentos
 
 def cargar_datos():
-    oferta = obtener_input_usuario("Introduce el nombre de la oferta de trabajo")
+    #oferta = obtener_input_usuario("Introduce el nombre de la oferta de trabajo")
+    oferta = "encargado de supermercado"
     cv_completo = leer_cv("cv.txt")
     
     if not oferta or not cv_completo:
@@ -76,16 +77,27 @@ def configurar_modelo():
 def crear_qa_chain(llm, retriever):
     custom_prompt_template = """Usa la siguiente información para evaluar el CV del candidato.
 
-    Contexto: {context}
-    Pregunta: {question}
+Contexto: {context}
+Pregunta: {question}
 
-    Genera una respuesta en formato JSON que contenga la siguiente información:
-    a. Valor numérico con la puntuación de 0 a 100 según la experiencia: Se debe tener en cuenta sólo los puestos de trabajo relacionados con el del título aportado, por ejemplo, no debe contar la experiencia como repartidor para un puesto de cajero.
-    b. Listado de la experiencia: Debe devolver un listado con las experiencias que son relacionadas a la oferta propuesta, este listado debe contener la siguiente información de cada experiencia: Puesto, Empresa y duración.
-    c. Descripción de la experiencia: Debe devolver un texto explicativo sobre la experiencia del candidato y por qué ha obtenido la puntuación dada.
+Genera una respuesta en formato JSON que contenga la siguiente información:
+a. Valor numérico con la puntuación de 0 a 100 según la experiencia: Se debe tener en cuenta sólo los puestos de trabajo relacionados con el del título aportado, por ejemplo, no debe contar la experiencia como repartidor para un puesto de cajero.
+b. Listado de la experiencia: Debe devolver un listado con las experiencias que son relacionadas a la oferta propuesta, este listado debe contener la siguiente información de cada experiencia: Puesto, Empresa y duración.
+c. Descripción de la experiencia: Debe devolver un texto explicativo sobre la experiencia del candidato y por qué ha obtenido la puntuación dada.
 
-    Respuesta JSON:
-    """
+Respuesta JSON:
+{{
+    "puntuacion": <valor_numérico>,
+    "experiencia": [
+        {{
+            "puesto": "<puesto>",
+            "empresa": "<empresa>",
+            "duración": "<duración>"
+        }}
+    ],
+    "descripcion": "<descripción>"
+}}
+"""
     prompt = PromptTemplate(template=custom_prompt_template, input_variables=['context', 'question'])
 
     qa = RetrievalQA.from_chain_type(
@@ -134,20 +146,19 @@ def iniciar_chat(qa, oferta, cv_completo):
 
             respuesta = future.result()
             
-            metadata = []
-            for doc in respuesta['source_documents']:
-                metadata.append(('page: ' + str(doc.metadata['page']), doc.metadata['file_path']))
-            resultado_json = {
-                "puntuacion": respuesta['result'],
-                "trabajos_relacionados": metadata,
-                "descripcion": "Descripción de la evaluación basada en la oferta de trabajo y el CV."
-            }
+            # Parse the response
+            try:
+                resultado_json = json.loads(respuesta['result'])
+            except json.JSONDecodeError:
+                print(f"{VERDE}Error:{RESET} La respuesta del modelo no es un JSON válido.")
+                continue
+
             print(f"{VERDE}Asistente:{RESET}", json.dumps(resultado_json, indent=4, ensure_ascii=False), '\n')
         except ValueError as ve:
             print(f"{VERDE}Error:{RESET} {str(ve)}")
         except Exception as e:
             print(f"{VERDE}Error inesperado:{RESET} {str(e)}")
-
+            
 
 if __name__ == "__main__":
     try:
