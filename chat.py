@@ -5,6 +5,10 @@ from langchain.chains import RetrievalQA
 from uploadData import cargar_documentos, crear_vectorstore
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
+import time
+from tqdm import tqdm
+import threading
+from concurrent.futures import ThreadPoolExecutor
 
 # Códigos de escape ANSI para colores
 AZUL = "\033[94m"
@@ -96,6 +100,10 @@ def crear_qa_chain(llm, retriever):
 
 def iniciar_chat(qa, oferta, cv_completo):
     print("¡Bienvenido al chat! Escribe 'salir' para terminar.")
+    
+    def get_response(inputs):
+        return qa.invoke(inputs)
+
     while True:
         pregunta = input(f"{AZUL}Tú:{RESET} ")
         if pregunta.lower() == 'salir':
@@ -112,7 +120,19 @@ def iniciar_chat(qa, oferta, cv_completo):
             # Debug prints
             print(f"Inputs: {inputs}")
 
-            respuesta = qa.invoke(inputs)  # Usa el método `run` en lugar de `invoke`
+            # Start the progress animation
+            with ThreadPoolExecutor() as executor:
+                future = executor.submit(get_response, inputs)
+                with tqdm(total=100, desc="Generando respuesta", bar_format="{l_bar}{bar} [ tiempo restante: {remaining} ]") as pbar:
+                    while not future.done():
+                        time.sleep(0.1)  # Simulate work being done
+                        pbar.update(1)
+                        if pbar.n >= 100:
+                            pbar.n = 0  # Reset the progress bar
+                            pbar.last_print_n = 0
+                    pbar.update(100 - pbar.n)  # Ensure it completes at 100%
+
+            respuesta = future.result()
             
             metadata = []
             for doc in respuesta['source_documents']:
@@ -128,11 +148,12 @@ def iniciar_chat(qa, oferta, cv_completo):
         except Exception as e:
             print(f"{VERDE}Error inesperado:{RESET} {str(e)}")
 
+
 if __name__ == "__main__":
     try:
         oferta, cv_completo = cargar_datos()
-        print(f"CV:\n{cv_completo[:100]}...\n")  # Muestra las primeras 100 caracteres para verificación
-        print(f"La oferta es {oferta}\n")
+        #print(f"CV:\n{cv_completo[:100]}...\n")  # Muestra las primeras 100 caracteres para verificación
+        #print(f"La oferta es {oferta}\n")
 
         llm, retriever = configurar_modelo()
         qa = crear_qa_chain(llm, retriever)
