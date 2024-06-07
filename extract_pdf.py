@@ -18,6 +18,6 @@ def extract_text_from_pdf(pdf_path):
     return text
 
 # Uso de la función
-pdf_path = "CV_Andres_2024.pdf"
+pdf_path = "src/CV_Andres_2024.pdf"
 extracted_text = extract_text_from_pdf(pdf_path)
 print(extracted_text)

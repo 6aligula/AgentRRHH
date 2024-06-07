@@ -9,18 +9,34 @@ from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
 AZUL = "\033[94m"
 VERDE = "\033[92m"
 RESET = "\033[0m"
-def iniciar_chat(ruta_archivo):
+
+def obtener_input_usuario(prompt):
+    """
+    Solicita y devuelve la entrada del usuario después de verificar que no esté vacía.
+    """
+    while True:
+        entrada = input(f"{AZUL}{prompt}:{RESET} ").strip()
+        if entrada:
+            return entrada
+        else:
+            print("La entrada no puede estar vacía. Inténtalo de nuevo.")
+
+def iniciar_chat():
+    oferta = obtener_input_usuario("Introduce el nombre de la oferta de trabajo")
+    cv_completo = obtener_input_usuario("Introduce el CV completo del candidato")
+    
     llm = Ollama(model="phi3:mini")
     embed_model = FastEmbedEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-
     vectorstore = Chroma(embedding_function=embed_model,
-                                       persist_directory="chroma_db_dir",
-                                       collection_name="cv_data")
+                         persist_directory="chroma_db_dir",
+                         collection_name="cv_data")
+    
     total_rows = len(vectorstore.get()['ids'])
     if total_rows == 0:
-        docs = cargar_documentos(ruta_archivo)
+        docs = cargar_documentos(cv_completo)
         vectorstore = crear_vectorstore(docs)
+    
     retriever = vectorstore.as_retriever(search_kwargs={'k': 4})
 
     custom_prompt_template = """Usa la siguiente información para responder a la pregunta del usuario.
@@ -56,5 +72,4 @@ def iniciar_chat(ruta_archivo):
         print(f"{VERDE}Asistente:{RESET}", respuesta['result'], '\n', metadata)
 
 if __name__ == "__main__":
-    ruta_archivo = "src/CV_Andres_2024.pdf"
-    iniciar_chat(ruta_archivo)
+    iniciar_chat()
