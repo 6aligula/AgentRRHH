@@ -100,3 +100,86 @@ La descripción de la experiencia destaca las habilidades del candidato en la co
 
 **Conclusión:** El modelo sigue mostrando alucinaciones y falta de precisión.
 
+## Prueba con el modelo gpt-4o de openai
+
+### Pregunta
+
+```bash
+¿Cuál es la puntuación del candidato?
+```
+
+### Respuesta
+
+```json
+{
+    "puntuacion": 65,
+    "experiencia": [
+        {
+            "puesto": "Reponedor",
+            "empresa": "GRUPO SUPECO MAXOR S.L.",
+            "duración": "09/2021 - 03/2022"
+        },
+        {
+            "puesto": "Mozo de almacén y manipulador de cartón",
+            "empresa": "ENCUNY S.L.",
+            "duración": "02/2020 - 08/2021"
+        },
+        {
+            "puesto": "Responsable de cocina",
+            "empresa": "AREAS S.A.U.",
+            "duración": "08/2018 - 02/2019"
+        }
+    ],
+    "descripcion": "Andrés F. Uribe V. tiene una experiencia laboral variada, con roles que incluyen reponedor, mozo de almacén y responsable de cocina. Aunque no ha ocupado directamente un puesto de encargado de supermercado, ha demostrado habilidades relevantes como gestión de inventarios, control de calidad y liderazgo en sus roles anteriores. Su experiencia en GRUPO SUPECO MAXOR S.L. como reponedor y en ENCUNY S.L. como mozo de almacén y manipulador de cartón le ha proporcionado conocimientos en logística y coordinación de almacén. Además, su rol como responsable de cocina en AREAS S.A.U. le ha permitido desarrollar habilidades de liderazgo y gestión de equipos. Sin embargo, carece de formación académica específica en áreas como administración de empresas o gestión comercial, lo que limita su puntuación en ese criterio. En general, Andrés muestra potencial para el puesto de encargado de supermercado, pero necesitaría formación adicional y experiencia directa en roles de supervisión en el sector."
+}
+```
+
+**Conclusión:** El modelo gpt-4o demuestra precisión y capacidad de respuesta adecuada, generando resultados en un formato JSON limpio y utilizable.
+
+## Prueba con el modelo gpt-3.5-turbo
+
+### Pregunta
+
+```bash
+¿Cuál es la puntuación del candidato?
+```
+
+### Respuesta
+
+```json
+{
+    "puntuacion": 65,
+    "experiencia": [
+        {
+            "puesto": "Mozo de almacén y manipulador de cartón",
+            "empresa": "ENCUNY S.L.",
+            "duración": "02/2020 - 08/2021"
+        },
+        {
+            "puesto": "Reponedor",
+            "empresa": "ENCUNY S.L.",
+            "duración": "09/2021 - 03/2022"
+        },
+        {
+            "puesto": "Oficial de encoladora packaging y manipulador profesional de cartón",
+            "empresa": "ENCUNY S.L. GRUPO SUPECO MAXOR S.L.",
+            "duración": "03/2022 - 02/2024"
+        }
+    ],
+    "descripcion": "El candidato cuenta con experiencia relevante en el sector de supermercados y logística, habiendo desempeñado roles como mozo de almacén, manipulador de cartón, reponedor y oficial de encoladora packaging. Su experiencia en ENCUNY S.L. y GRUPO SUPECO MAXOR S.L. demuestra su capacidad para gestionar inventarios, coordinar equipos y cumplir con normativas de calidad. Además, posee habilidades en logística, control de stock y seguridad alimentaria. Aunque su formación académica no incluye un grado universitario relacionado, sus conocimientos técnicos y habilidades prácticas lo hacen un candidato adecuado para el puesto de encargado de supermercado."
+}
+```
+
+**Conclusión:** Aunque el modelo gpt-3.5-turbo genera una respuesta adecuada, presenta inconsistencias en la asignación de roles y empresas.
+
+## Conclusión General
+
+**Precisión en la Experiencia Laboral:**
+- **GPT-4** es más preciso en listar las empresas y los roles correctos, de acuerdo con la información proporcionada en el CV.
+- **GPT-3.5-turbo** tiene errores en la asignación de empresas para ciertos roles.
+
+**Calidad de la Descripción:**
+- **GPT-4** proporciona una evaluación más crítica y completa de las cualificaciones del candidato, incluyendo la necesidad de formación adicional.
+- **GPT-3.5-turbo** ofrece una evaluación positiva pero omite detalles importantes como la falta de formación específica y la necesidad de formación adicional.
+
+**Conclusión Final:** El modelo GPT-4 de OpenAI se muestra como la mejor opción para la evaluación de candidatos, proporcionando respuestas precisas y detalladas que pueden ser directamente consumidas por un frontend.
