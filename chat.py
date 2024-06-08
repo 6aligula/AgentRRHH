@@ -141,7 +141,7 @@ def iniciar_chat(qa, oferta, cv_completo):
         return qa.invoke(inputs)
 
     while True:
-        pregunta = input(f"{AZUL}Tú:{RESET} ")
+        pregunta = input(f"{AZUL}Tú (Ejemplo: ¿Cuál es la puntuación del candidato?):{RESET} ")
         if pregunta.lower() == 'salir':
             print("¡Hasta luego!")
             break
