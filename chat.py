@@ -64,7 +64,6 @@ def configurar_modelo():
     total_rows = len(vectorstore.get()['ids'])
     if total_rows == 0:
         rutas_archivos = [
-            "src/Ejemplo_Sistema_de_Puntuacion_Experiencia.pdf",
             "src/Lista_Trabajos_Relacionados_Encargado_Supermercado.pdf",
             "src/Sistema_de_Puntuacion.pdf"
         ]
@@ -75,7 +74,7 @@ def configurar_modelo():
     return llm, retriever
 
 def crear_qa_chain(llm, retriever):
-    custom_prompt_template = """Usa la siguiente información para evaluar el CV del candidato.
+    custom_prompt_template = """Usa la siguiente información para evaluar al candidato
 
 Contexto: {context}
 Pregunta: {question}

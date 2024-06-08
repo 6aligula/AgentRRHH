@@ -1,3 +1,4 @@
 /env_llmCv
 .vscode
 __pycache__
+.DS_Store
