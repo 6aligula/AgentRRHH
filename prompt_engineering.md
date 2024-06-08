@@ -142,13 +142,36 @@ El modelo me responde con un formato markdown ```{json} response``` de lo que pu
 ## Nuevo prompt 
 
 ```{bash}
-Genera una respuesta en formato JSON que contenga la siguiente información, sin ninguna explicación adicional:
+Genera una respuesta en formato JSON que contenga la siguiente información, sin comillas de markdown, solo siñete al formato json especificado
 ```
 
 # Respuesta
 
 ```{bash}
+Asistente: {
+    "puntuacion": 45,
+    "experiencia": [
+        {
+            "puesto": "Reponedor",
+            "empresa": "GRUPO SUPECO MAXOR S.L.",
+            "duración": "09/2021 - 03/2022"
+        },
+        {
+            "puesto": "Mozo de almacén y manipulador de cartón",
+            "empresa": "ENCUNY S.L.",
+            "duración": "02/2020 - 08/2021"
+        },
+        {
+            "puesto": "Responsable de cocina",
+            "empresa": "AREAS S.A.U.",
+            "duración": "08/2018 - 02/2019"
+        }
+    ],
+    "descripcion": "Andrés F. Uribe tiene experiencia relevante en roles de reponedor y mozo de almacén, lo cual es útil para la gestión de inventarios y stock en un supermercado. Sin embargo, no tiene experiencia directa en puestos de liderazgo o gestión de equipos en un entorno de supermercado, lo que limita su puntuación en experiencia laboral. En cuanto a habilidades y competencias, Andrés tiene conocimientos en logística y coordinación de almacén, así como en atención al cliente y resolución de conflictos, pero carece de experiencia en liderazgo y ventas. Su formación académica es básica, con un graduado en E.S.O., y no tiene cursos adicionales relevantes. En conocimientos técnicos, no se menciona manejo de software de gestión de tiendas o herramientas de análisis de datos. En resumen, Andrés tiene una base sólida en operaciones y logística, pero le falta experiencia en liderazgo y gestión específica de supermercados."
+} 
 ```
+El modelo gpt-4o ha demostrado ser totalmente capacitado para esta tarea a un precio de 1 centimo por cada interacción.
+
 # Pregunta 
 
 ```{bash}

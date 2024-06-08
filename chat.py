@@ -108,7 +108,7 @@ Para evaluar al candidato, considera los siguientes criterios y asigna una puntu
 5. Desempeño en la entrevista (hasta 10 puntos):
    - Comunicación efectiva, resolución de problemas, actitud y disposición.
 
-Genera una respuesta en formato JSON que contenga la siguiente información:
+Genera una respuesta en formato JSON que contenga la siguiente información, sin comillas de markdown, solo siñete al formato json especificado
 a. Valor numérico con la puntuación de 0 a 100 según la experiencia y los otros criterios mencionados.
 b. Listado de la experiencia: Debe devolver un listado con las experiencias que son relacionadas a la oferta propuesta, este listado debe contener la siguiente información de cada experiencia: Puesto, Empresa y duración.
 c. Descripción de la experiencia: Debe devolver un texto explicativo sobre la experiencia del candidato y por qué ha obtenido la puntuación dada.
@@ -159,7 +159,7 @@ def iniciar_chat(retriever, oferta, cv_completo):
             prompt = crear_prompt(cv_completo, oferta)
             
             # Debug prints
-            #print(f"Prompt: {prompt}")
+            print(f"Prompt: {prompt}")
 
             # Start the progress animation
             with ThreadPoolExecutor() as executor:
@@ -176,7 +176,7 @@ def iniciar_chat(retriever, oferta, cv_completo):
             respuesta = future.result()
             
             # Print the raw response for debugging
-            print(f"{VERDE}Respuesta en bruto del modelo:{RESET} {respuesta}")
+            #print(f"{VERDE}Respuesta en bruto del modelo:{RESET} {respuesta}")
 
             # Parse the response
             try:
