@@ -1,19 +1,26 @@
 import json
-from langchain_community.llms import Ollama
-from langchain.prompts import PromptTemplate
-from langchain.chains import RetrievalQA
-from uploadData import cargar_documentos, crear_vectorstore
-from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
 import time
 from tqdm import tqdm
-import threading
 from concurrent.futures import ThreadPoolExecutor
+from dotenv import load_dotenv
+import os
+from langchain_community.vectorstores import Chroma
+from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
+from uploadData import cargar_documentos, crear_vectorstore
+from openai import OpenAI
+import openai
 
 # Códigos de escape ANSI para colores
 AZUL = "\033[94m"
 VERDE = "\033[92m"
 RESET = "\033[0m"
+
+# Cargar variables de entorno desde el archivo .env
+load_dotenv()
+
+# Configura tu clave API de OpenAI
+# openai.api_key = os.getenv('OPENAI_API_KEY')
+# client = OpenAI()
 
 def obtener_input_usuario(prompt):
     """
@@ -44,7 +51,6 @@ def cargar_multiples_documentos(rutas_archivos):
     return documentos
 
 def cargar_datos():
-    #oferta = obtener_input_usuario("Introduce el nombre de la oferta de trabajo")
     oferta = "encargado de supermercado"
     cv_completo = leer_cv("cv.txt")
     
@@ -53,9 +59,7 @@ def cargar_datos():
     
     return oferta, cv_completo
 
-def configurar_modelo():
-    #llm = Ollama(model="phi3:mini")
-    llm = Ollama(model="llama3:latest")
+def configurar_vectorstore():
     embed_model = FastEmbedEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
     vectorstore = Chroma(embedding_function=embed_model,
@@ -72,13 +76,13 @@ def configurar_modelo():
         vectorstore = crear_vectorstore(docs)
     
     retriever = vectorstore.as_retriever(search_kwargs={'k': 4})
-    return llm, retriever
+    return retriever
 
-def crear_qa_chain(llm, retriever):
-    custom_prompt_template = """Usa la siguiente información para evaluar al candidato para el puesto de encargado de supermercado.
+def crear_prompt(cv_completo, oferta):
+    return f"""Usa la siguiente información para evaluar al candidato para el puesto de encargado de supermercado.
 
-Contexto del CV del candidato: {context}
-Contexto de la oferta de trabajo: {question}
+Contexto del CV del candidato: {cv_completo}
+Contexto de la oferta de trabajo: {oferta}
 
 Para evaluar al candidato, considera los siguientes criterios y asigna una puntuación en base a ellos:
 
@@ -105,12 +109,12 @@ Para evaluar al candidato, considera los siguientes criterios y asigna una puntu
    - Comunicación efectiva, resolución de problemas, actitud y disposición.
 
 Genera una respuesta en formato JSON que contenga la siguiente información:
-a. Valor numérico con la puntuación de 0 a 100 según la experiencia: Se debe tener en cuenta sólo los puestos de trabajo relacionados con el del título aportado, por ejemplo, no debe contar la experiencia como repartidor para un puesto de cajero.
+a. Valor numérico con la puntuación de 0 a 100 según la experiencia y los otros criterios mencionados.
 b. Listado de la experiencia: Debe devolver un listado con las experiencias que son relacionadas a la oferta propuesta, este listado debe contener la siguiente información de cada experiencia: Puesto, Empresa y duración.
 c. Descripción de la experiencia: Debe devolver un texto explicativo sobre la experiencia del candidato y por qué ha obtenido la puntuación dada.
 
 Respuesta JSON:
-Asistente: {{
+{{
     "puntuacion": <valor_numérico>,
     "experiencia": [
         {{
@@ -122,24 +126,28 @@ Asistente: {{
     "descripcion": "<descripción>"
 }}
 """
-    prompt = PromptTemplate(template=custom_prompt_template, input_variables=['context', 'question'])
 
-    qa = RetrievalQA.from_chain_type(
-        llm=llm,
-        chain_type="stuff",
-        retriever=retriever,
-        return_source_documents=True,
-        chain_type_kwargs={"prompt": prompt}
+MODEL="gpt-4o"
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "<your OpenAI API key if not set as an env var>"))
+
+def obtener_respuesta(prompt):
+    # Define los mensajes del chat
+    messages = [
+        {"role": "system", "content": "Eres un experto en selección de personal"},
+        {"role": "user", "content": prompt}
+    ]
+    response = client.chat.completions.create(
+        model=MODEL,
+        messages=messages,
+        max_tokens=500,
+        temperature=0
     )
-    
-    return qa
+    return response.choices[0].message.content
 
-def iniciar_chat(qa, oferta, cv_completo):
+
+def iniciar_chat(retriever, oferta, cv_completo):
     print("¡Bienvenido al chat! Escribe 'salir' para terminar.")
     
-    def get_response(inputs):
-        return qa.invoke(inputs)
-
     while True:
         pregunta = input(f"{AZUL}Tú:{RESET} ")
         if pregunta.lower() == 'salir':
@@ -148,17 +156,14 @@ def iniciar_chat(qa, oferta, cv_completo):
 
         try:
             context = f"CV completo: {cv_completo}\nOferta de trabajo: {oferta}"
-            inputs = {
-                "query": pregunta,
-                "context": context
-            }
+            prompt = crear_prompt(cv_completo, oferta)
             
             # Debug prints
-            print(f"Inputs: {inputs}")
+            #print(f"Prompt: {prompt}")
 
             # Start the progress animation
             with ThreadPoolExecutor() as executor:
-                future = executor.submit(get_response, inputs)
+                future = executor.submit(obtener_respuesta, prompt)
                 with tqdm(total=100, desc="Generando respuesta", bar_format="{l_bar}{bar} [ tiempo restante: {remaining} ]") as pbar:
                     while not future.done():
                         time.sleep(0.1)  # Simulate work being done
@@ -170,11 +175,12 @@ def iniciar_chat(qa, oferta, cv_completo):
 
             respuesta = future.result()
             
-            print(f"{VERDE}Respuesta en bruto del modelo:{RESET} {respuesta['result']}")
-            
+            # Print the raw response for debugging
+            print(f"{VERDE}Respuesta en bruto del modelo:{RESET} {respuesta}")
+
             # Parse the response
             try:
-                resultado_json = json.loads(respuesta['result'])
+                resultado_json = json.loads(respuesta)
             except json.JSONDecodeError:
                 print(f"{VERDE}Error:{RESET} La respuesta del modelo no es un JSON válido.")
                 continue
@@ -189,11 +195,7 @@ def iniciar_chat(qa, oferta, cv_completo):
 if __name__ == "__main__":
     try:
         oferta, cv_completo = cargar_datos()
-        #print(f"CV:\n{cv_completo[:100]}...\n")  # Muestra las primeras 100 caracteres para verificación
-        #print(f"La oferta es {oferta}\n")
-
-        llm, retriever = configurar_modelo()
-        qa = crear_qa_chain(llm, retriever)
-        iniciar_chat(qa, oferta, cv_completo)
+        retriever = configurar_vectorstore()
+        iniciar_chat(retriever, oferta, cv_completo)
     except Exception as e:
         print(f"{VERDE}Error inicializando el chat:{RESET} {str(e)}")
