@@ -1,4 +1,4 @@
-# Pregunta
+# Pregunta porbando el modelo phi3:mini
 
 ```{bash}
 ¿Cuál es la puntuación del candidato?
@@ -28,7 +28,7 @@ Tú: salir
 ¡Hasta luego!
 ```
 
-# Pregunta
+# Pregunta 
 
 ```{bash}
 ¿Cuál es la puntuación del candidato?
@@ -56,9 +56,75 @@ Asistente: {
 ```
 **Claramente el modelo esta alucinando**
 
-# Pregunta
+# Pregunta proibando el modelo llama3 de 4,7GB
 
 ```{bash}
+¿Cuál es la puntuación del candidato?
+```
+
+# Respuesta: 
+La respuesta del modelo es mas imaginativa y añade una pequeña introduccion al json no deseada.
+```{bash}
+```
+
+# Pregunta 
+
+```{bash}
+¿Cuál es la puntuación del candidato?
+```
+
+# Respuesta
+
+```{bash}
+Respuesta en bruto del modelo: A continuación, se presenta la evaluación del candidato para el puesto de encargado de supermercado:
+
+```
+{
+    "puntuacion": 25,
+    "experiencia": [
+        {
+            "puesto": "Coordinador de Promociones y Ofertas",
+            "empresa": "Compañía XYZ",
+            "duración": "2 años"
+        },
+        {
+            "puesto": "Encargado de Gestión de Residuos y Reciclaje",
+            "empresa": "Supermercado ABC",
+            "duración": "1 año 6 meses"
+        }
+    ],
+    "descripcion": "El candidato tiene experiencia en coordinar promociones y ofertas, lo que demuestra su capacidad para gestionar recursos y lograr objetivos. Además, ha demostrado habilidades en la gestión de residuos y reciclaje en un supermercado, lo que sugiere que es consciente de las responsabilidades ambientales y sociales en la gestión de una tienda."
+}
+```
+
+La puntuación se basa en la experiencia laboral del candidato, que tiene 2 años y 6 meses en total. Los 10 puntos se asignan por el puesto de Coordinador de Promociones y Ofertas, ya que está relacionado con la gestión de tiendas/supermercados. Los otros 15 puntos se asignan por el puesto de Encargado de Gestión de Residuos y Reciclaje, ya que también está relacionado con la gestión de tiendas/supermercados y demuestra habilidades en la gestión de recursos y lograr objetivos.
+
+La descripción de la experiencia destaca las habilidades del candidato en la coordinación de promociones y ofertas, así como su capacidad para gestionar residuos y reciclaje de manera efectiva.
+```
+# Pregunta 
+
+```{bash}
+¿Cuál es la puntuación del candidato?
+```
+
+# Respuesta
+
+```{bash}
+```
+# Pregunta 
+
+```{bash}
+¿Cuál es la puntuación del candidato?
+```
+
+# Respuesta
+
+```{bash}
+```
+# Pregunta 
+
+```{bash}
+¿Cuál es la puntuación del candidato?
 ```
 
 # Respuesta

@@ -54,7 +54,8 @@ def cargar_datos():
     return oferta, cv_completo
 
 def configurar_modelo():
-    llm = Ollama(model="phi3:mini")
+    #llm = Ollama(model="phi3:mini")
+    llm = Ollama(model="llama3:latest")
     embed_model = FastEmbedEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
     vectorstore = Chroma(embedding_function=embed_model,
@@ -109,7 +110,7 @@ b. Listado de la experiencia: Debe devolver un listado con las experiencias que 
 c. Descripción de la experiencia: Debe devolver un texto explicativo sobre la experiencia del candidato y por qué ha obtenido la puntuación dada.
 
 Respuesta JSON:
-{{
+Asistente: {{
     "puntuacion": <valor_numérico>,
     "experiencia": [
         {{
@@ -168,6 +169,8 @@ def iniciar_chat(qa, oferta, cv_completo):
                     pbar.update(100 - pbar.n)  # Ensure it completes at 100%
 
             respuesta = future.result()
+            
+            print(f"{VERDE}Respuesta en bruto del modelo:{RESET} {respuesta['result']}")
             
             # Parse the response
             try:
