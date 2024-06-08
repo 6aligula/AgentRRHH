@@ -74,10 +74,34 @@ def configurar_modelo():
     return llm, retriever
 
 def crear_qa_chain(llm, retriever):
-    custom_prompt_template = """Usa la siguiente información para evaluar al candidato
+    custom_prompt_template = """Usa la siguiente información para evaluar al candidato para el puesto de encargado de supermercado.
 
-Contexto: {context}
-Pregunta: {question}
+Contexto del CV del candidato: {context}
+Contexto de la oferta de trabajo: {question}
+
+Para evaluar al candidato, considera los siguientes criterios y asigna una puntuación en base a ellos:
+
+1. Experiencia Laboral (hasta 30 puntos):
+   - Experiencia en los siguientes puestos relacionados (10 puntos por cada puesto, hasta 3 puestos):
+     Gerente de Tienda, Supervisor de Ventas, Jefe de Sección en Supermercado, Administrador de Supermercado, Encargado de Turno en Tienda, Coordinador de Almacén, Responsable de Inventario, Jefe de Caja, Encargado de Atención al Cliente, Coordinador de Logística, Gerente de Operaciones, Supervisor de Área de Perecederos, Encargado de Compras, Jefe de Reposición, Supervisor de Seguridad, Responsable de Recursos Humanos en Tienda, Coordinador de Mantenimiento, Supervisor de Marketing en Punto de Venta, Jefe de Productos Frescos, Encargado de Gestión de Personal, Responsable de Planificación de Ventas, Coordinador de Promociones y Ofertas, Encargado de Gestión de Residuos y Reciclaje, Supervisor de Calidad de Productos, Jefe de Relaciones con Proveedores, Encargado de Formación de Personal, Responsable de Servicio Postventa, Jefe de Almacén y Logística, Encargado de Control de Pérdidas, Responsable de Satisfacción del Cliente.
+
+2. Habilidades y Competencias (hasta 30 puntos):
+   - Liderazgo y gestión de equipos (10 puntos)
+   - Gestión de inventarios y stock (5 puntos)
+   - Atención al cliente y resolución de conflictos (5 puntos)
+   - Conocimientos en logística y coordinación de almacén (5 puntos)
+   - Habilidades en ventas y marketing en punto de venta (5 puntos)
+
+3. Formación Académica (hasta 20 puntos):
+   - Grado universitario relacionado (10 puntos): Administración de Empresas, Gestión Comercial, Logística, Marketing.
+   - Cursos y certificaciones adicionales (5 puntos cada uno, hasta 2 cursos/certificaciones).
+
+4. Conocimientos Técnicos (hasta 10 puntos):
+   - Manejo de software de gestión de tiendas/supermercados (5 puntos)
+   - Conocimientos de herramientas de análisis de datos (5 puntos)
+
+5. Desempeño en la entrevista (hasta 10 puntos):
+   - Comunicación efectiva, resolución de problemas, actitud y disposición.
 
 Genera una respuesta en formato JSON que contenga la siguiente información:
 a. Valor numérico con la puntuación de 0 a 100 según la experiencia: Se debe tener en cuenta sólo los puestos de trabajo relacionados con el del título aportado, por ejemplo, no debe contar la experiencia como repartidor para un puesto de cajero.

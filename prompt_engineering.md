@@ -31,12 +31,30 @@ Tú: salir
 # Pregunta
 
 ```{bash}
+¿Cuál es la puntuación del candidato?
 ```
 
 # Respuesta
 
 ```{bash}
+Asistente: {
+    "puntuacion": 25,
+    "experiencia": [
+        {
+            "puesto": "Coordinador de Promociones y Ofertas",
+            "empresa": "Supermercado XYZ",
+            "duración": "6 meses"
+        },
+        {
+            "puesto": "Encargado de Gestión de Residuos y Reciclaje",
+            "empresa": "Supermercado ABC",
+            "duración": "3 meses"
+        }
+    ],
+    "descripcion": "El candidato ha demostrado experiencia en el sector de supermercados, destacando su papel como Coordinador de Promociones y Ofertas en Supermercado XYZ y como Encargado de Gestión de Residuos y Reciclaje en Supermercado ABC. Su participación se centró en la gestión de actividades comerciales y sostenibilidad ambiental, respectivamente. Esto refleja una comprensión práctica del manejo de inventarios, atención al cliente y soluciones de marketing dentro del contexto supermercadista."
+} 
 ```
+**Claramente el modelo esta alucinando**
 
 # Pregunta
 
