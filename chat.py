@@ -8,6 +8,7 @@ from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
 from uploadData import cargar_documentos, crear_vectorstore, leer_pdf
 from openai import OpenAI
+import requests
 
 # Códigos de escape ANSI para colores
 AZUL = "\033[94m"
@@ -112,27 +113,63 @@ Respuesta JSON:
 """
 
 
-#MODEL="gpt-4o"
-MODEL="gpt-3.5-turbo"
+MODEL="gpt-4o"
+#MODEL="gpt-3.5-turbo"
+LOCAL_API_URL = "http://localhost:11434/api/chat"
 
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "<your OpenAI API key if not set as an env var>"))
 
-def obtener_respuesta(prompt):
+def parse_ollama_response(response):
+    parsed_data = []
+    try:
+        for line in response.iter_lines():
+            if line:
+                #print(f"Debug: Line - {line.decode('utf-8')}")  # Debug print para cada línea
+                obj = json.loads(line.decode('utf-8'))  # Parsear la línea como JSON
+                if 'message' in obj and 'content' in obj['message']:
+                    parsed_data.append(obj['message']['content'])
+    except Exception as e:
+        print(f"Error procesando la respuesta: {e}")
+    return ''.join(parsed_data)
+
+def obtener_respuesta(prompt, usar_modelo_local=False):
     # Define los mensajes del chat
     messages = [
         {"role": "system", "content": "Eres un experto en selección de personal"},
         {"role": "user", "content": prompt}
     ]
-    response = client.chat.completions.create(
-        model=MODEL,
-        messages=messages,
-        max_tokens=500,
-        temperature=0
-    )
-    return response.choices[0].message.content
+    
+    if usar_modelo_local:
+        response = requests.post(
+            LOCAL_API_URL,
+            headers={"Content-Type": "application/json"},
+            json={"model": "phi3:mini", "messages": messages},
+            stream=True
+        )
+        return parse_ollama_response(response)
+    else:
+        response = client.chat.completions.create(
+            model=MODEL,
+            messages=messages,
+            max_tokens=500,
+            temperature=0
+        )
+        return response.choices[0].message.content
 
+def obtener_respuesta_con_barra_de_carga(prompt, usar_modelo_local):
+    with ThreadPoolExecutor() as executor:
+        future = executor.submit(obtener_respuesta, prompt, usar_modelo_local)
+        with tqdm(total=100, desc="Generando respuesta", bar_format="{l_bar}{bar} [ tiempo restante: {remaining} ]") as pbar:
+            while not future.done():
+                time.sleep(0.1)  # Simulate work being done
+                pbar.update(1)
+                if pbar.n >= 100:
+                    pbar.n = 0  # Reset the progress bar
+                    pbar.last_print_n = 0
+            pbar.update(100 - pbar.n)  # Ensure it completes at 100%
+        return future.result()
 
-def iniciar_chat(oferta, cv_completo, contextos_adicionales):
+def iniciar_chat(oferta, cv_completo, contextos_adicionales, usar_modelo_local=False):
     print("¡Bienvenido al chat!")
     pregunta = "¿Cuál es la puntuación del candidato?"
 
@@ -140,20 +177,9 @@ def iniciar_chat(oferta, cv_completo, contextos_adicionales):
         prompt = crear_prompt(cv_completo, oferta, contextos_adicionales)
         print(f"{AZUL}Tú:{RESET} {pregunta}")
 
-        # Start the progress animation
-        with ThreadPoolExecutor() as executor:
-            future = executor.submit(obtener_respuesta, prompt)
-            with tqdm(total=100, desc="Generando respuesta", bar_format="{l_bar}{bar} [ tiempo restante: {remaining} ]") as pbar:
-                while not future.done():
-                    time.sleep(0.1)  # Simulate work being done
-                    pbar.update(1)
-                    if pbar.n >= 100:
-                        pbar.n = 0  # Reset the progress bar
-                        pbar.last_print_n = 0
-                pbar.update(100 - pbar.n)  # Ensure it completes at 100%
-
-        respuesta = future.result()
-        
+        respuesta = obtener_respuesta_con_barra_de_carga(prompt, usar_modelo_local)
+        #respuesta = obtener_respuesta(prompt, usar_modelo_local)
+        #print(f"{VERDE}Respuesta en bruto del modelo :{RESET} {respuesta}")
         # Parse the response
         try:
             resultado_json = json.loads(respuesta)
@@ -166,13 +192,15 @@ def iniciar_chat(oferta, cv_completo, contextos_adicionales):
     except ValueError as ve:
         print(f"{VERDE}Error:{RESET} {str(ve)}")
     except Exception as e:
-        print(f"{VERDE}Error inesperado:{RESET} {str(e)}")
+        print(f"{VERDE}Error inesperado, añade al fichero .env: OPENAI_API_KEY=tu-api-key:{RESET} {str(e)}")
           
 
 if __name__ == "__main__":
     try:
         oferta, cv_completo, contextos_adicionales = cargar_datos()
-        print(print(f"{AZUL}Oferta:{RESET} {oferta}\n"))
-        iniciar_chat(oferta, cv_completo, contextos_adicionales)
+        print(f"{AZUL}Oferta:{RESET} {oferta}\n")
+        # Determinar si usar modelo local o no
+        usar_modelo_local = obtener_input_usuario("¿Deseas usar el modelo local? (s/n)").lower() == 's'
+        iniciar_chat(oferta, cv_completo, contextos_adicionales, usar_modelo_local)
     except Exception as e:
         print(f"{VERDE}Error inicializando el chat:{RESET} {str(e)}")
