@@ -2,6 +2,30 @@
 
 Este repositorio contiene una evaluación comparativa de varios modelos de IA utilizados para evaluar la experiencia laboral de candidatos y generar puntuaciones basadas en dicha experiencia.
 
+**No olvides añadir en la raiz del proyecto el fichero .env con la informacion de tu api-key de open ai**
+```bash
+#contenido de .env
+OPENAI_API_KEY=tu-api-key-de-open-ai-aqui
+```
+# Puesta en marcha.
+Instala las dependencias necesarias
+```bash
+pip install requirements.txt
+```
+Arancha el proyecto:
+```bash
+python chat.py
+```
+**Interfaz**
+```bash
+Oferta: encargado de supermercado
+
+¿Deseas usar el modelo local? (s/n): s
+¡Bienvenido al chat!
+Tú: ¿Cuál es la puntuación del candidato?
+Generando respuesta:  82%|█████████████████████████████
+```
+
 ## Prueba con el modelo phi3:mini
 
 ### Pregunta
@@ -101,6 +125,16 @@ La descripción de la experiencia destaca las habilidades del candidato en la co
 **Conclusión:** El modelo sigue mostrando alucinaciones y falta de precisión.
 
 ## Prueba con el modelo gpt-4o de openai
+Para probar con los modelos de openai simplemente escribe `n`
+**Interfaz**
+```bash
+Oferta: encargado de supermercado
+
+¿Deseas usar el modelo local? (s/n): n
+¡Bienvenido al chat!
+Tú: ¿Cuál es la puntuación del candidato?
+Generando respuesta:  82%|█████████████████████████████
+```
 
 ### Pregunta
 
