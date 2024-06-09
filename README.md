@@ -217,3 +217,8 @@ Generando respuesta:  82%|██████████████████
 - **GPT-3.5-turbo** ofrece una evaluación positiva pero omite detalles importantes como la falta de formación específica y la necesidad de formación adicional.
 
 **Conclusión Final:** El modelo GPT-4 de OpenAI se muestra como la mejor opción para la evaluación de candidatos, proporcionando respuestas precisas y detalladas que pueden ser directamente consumidas por un frontend.
+
+## Licencia
+
+Este proyecto está licenciado bajo la Licencia Pública General de Affero de GNU con cláusulas adicionales. Para cualquier uso comercial, es necesario obtener una licencia comercial del autor. Para más detalles, consulta el archivo [LICENSE](LICENSE).
+
