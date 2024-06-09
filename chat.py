@@ -113,27 +113,23 @@ Respuesta JSON:
 """
 
 
-MODEL="gpt-4o"
-#MODEL="gpt-3.5-turbo"
+#MODEL="gpt-4o"
+MODEL="gpt-3.5-turbo"
 LOCAL_API_URL = "http://localhost:11434/api/chat"
 
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "<your OpenAI API key if not set as an env var>"))
 
 def parse_ollama_response(response):
-    parsed_data = []
     try:
         for line in response.iter_lines():
             if line:
-                #print(f"Debug: Line - {line.decode('utf-8')}")  # Debug print para cada línea
-                obj = json.loads(line.decode('utf-8'))  # Parsear la línea como JSON
+                obj = json.loads(line.decode('utf-8'))
                 if 'message' in obj and 'content' in obj['message']:
-                    parsed_data.append(obj['message']['content'])
+                    yield obj['message']['content']
     except Exception as e:
         print(f"Error procesando la respuesta: {e}")
-    return ''.join(parsed_data)
 
 def obtener_respuesta(prompt, usar_modelo_local=False):
-    # Define los mensajes del chat
     messages = [
         {"role": "system", "content": "Eres un experto en selección de personal"},
         {"role": "user", "content": prompt}
@@ -155,7 +151,7 @@ def obtener_respuesta(prompt, usar_modelo_local=False):
             temperature=0
         )
         return response.choices[0].message.content
-
+    
 def obtener_respuesta_con_barra_de_carga(prompt, usar_modelo_local):
     with ThreadPoolExecutor() as executor:
         future = executor.submit(obtener_respuesta, prompt, usar_modelo_local)
@@ -169,6 +165,13 @@ def obtener_respuesta_con_barra_de_carga(prompt, usar_modelo_local):
             pbar.update(100 - pbar.n)  # Ensure it completes at 100%
         return future.result()
 
+def mostrar_respuesta_en_tiempo_real(response_stream):
+    respuesta_completa = ""
+    for parte_respuesta in response_stream:
+        print(parte_respuesta, end="", flush=True)
+        respuesta_completa += parte_respuesta
+    return respuesta_completa
+
 def iniciar_chat(oferta, cv_completo, contextos_adicionales, usar_modelo_local=False):
     print("¡Bienvenido al chat!")
     pregunta = "¿Cuál es la puntuación del candidato?"
@@ -177,10 +180,12 @@ def iniciar_chat(oferta, cv_completo, contextos_adicionales, usar_modelo_local=F
         prompt = crear_prompt(cv_completo, oferta, contextos_adicionales)
         print(f"{AZUL}Tú:{RESET} {pregunta}")
 
-        respuesta = obtener_respuesta_con_barra_de_carga(prompt, usar_modelo_local)
-        #respuesta = obtener_respuesta(prompt, usar_modelo_local)
-        #print(f"{VERDE}Respuesta en bruto del modelo :{RESET} {respuesta}")
-        # Parse the response
+        if usar_modelo_local:
+            respuesta_stream = obtener_respuesta(prompt, usar_modelo_local)
+            respuesta = mostrar_respuesta_en_tiempo_real(respuesta_stream)
+        else:
+            respuesta = obtener_respuesta_con_barra_de_carga(prompt, usar_modelo_local)
+
         try:
             resultado_json = json.loads(respuesta)
         except json.JSONDecodeError:
@@ -193,6 +198,7 @@ def iniciar_chat(oferta, cv_completo, contextos_adicionales, usar_modelo_local=F
         print(f"{VERDE}Error:{RESET} {str(ve)}")
     except Exception as e:
         print(f"{VERDE}Error inesperado, añade al fichero .env: OPENAI_API_KEY=tu-api-key:{RESET} {str(e)}")
+
           
 
 if __name__ == "__main__":
